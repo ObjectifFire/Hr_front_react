@@ -1,12 +1,13 @@
 import React from 'react';
 
 function EmployeeTable({
-  employees,
-  companies,
-  employeeAssignments,
-  employeeCompanyMap,
+  employees = [],
+  companies = [],
+  employeeAssignments = {},
+  employeeCompanyMap = {},
   handleAssignChange,
-  assignEmployee
+  assignEmployee,
+  unassignEmployee
 }) {
   return (
     <table>
@@ -18,7 +19,7 @@ function EmployeeTable({
           <th>HR ID</th>
           <th>Entreprise (assignation)</th>
           <th>Lié à</th>
-          <th>Action</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -28,6 +29,8 @@ function EmployeeTable({
             <td>{employee.last_name}</td>
             <td>{employee.email}</td>
             <td>{employee.employee_hr_id}</td>
+
+            {/* Choix entreprise à assigner */}
             <td>
               <select
                 onChange={(e) =>
@@ -43,11 +46,59 @@ function EmployeeTable({
                 ))}
               </select>
             </td>
+
             <td>
-              {(employeeCompanyMap[employee.employee_hr_id] || []).join(', ') || '-'}
+              {companies
+                .filter(company =>
+                  employeeCompanyMap[employee.employee_hr_id]?.includes(company.siret)
+                )
+                .map(company => (
+                  <div
+                    key={company.siret}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '6px',
+                      marginBottom: '4px'
+                    }}
+                  >
+                    <span>{company.name}</span>
+                    <button
+                      onClick={() => unassignEmployee(employee, company.siret)}
+                      style={{
+                        backgroundColor: '#f44336',
+                        color: 'white',
+                        border: 'none',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ❌
+                    </button>
+                  </div>
+                ))}
+
+              {/* Si aucune entreprise liée */}
+              {!(employeeCompanyMap[employee.employee_hr_id]?.length > 0) && '-'}
             </td>
+
+            {/* Bouton assignation */}
             <td>
-              <button onClick={() => assignEmployee(employee)}>Assigner</button>
+              <button
+                onClick={() => assignEmployee(employee)}
+                style={{
+                  backgroundColor: '#1e88e5',
+                  color: 'white',
+                  padding: '6px 12px',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                Assigner
+              </button>
             </td>
           </tr>
         ))}

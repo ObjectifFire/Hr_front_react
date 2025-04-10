@@ -47,7 +47,7 @@ function Employees() {
           if (!map[emp.employee_hr_id]) {
             map[emp.employee_hr_id] = [];
           }
-          map[emp.employee_hr_id].push(company.name);
+          map[emp.employee_hr_id].push(company.siret);
         }
       } catch (err) {
         console.error(`Erreur chargement employés de ${company.name}:`, err);
@@ -95,6 +95,25 @@ function Employees() {
       });
   };
 
+  const unassignEmployee = (employee, companySiret) => {
+    const company = companies.find(c => c.siret === companySiret);
+    if (!company) return alert("Entreprise introuvable");
+  
+    if (!confirm(`Retirer ${employee.first_name} de ${company.name} ?`)) return;
+  
+    api.delete(`/companies/${company.siret}/employees/${employee.employee_hr_id}`)
+      .then(() => {
+        alert("Désassigné !");
+        fetchEmployees();
+        fetchEmployeeCompanyLinks();
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Erreur lors du désassignement");
+      });
+  };
+  
+
   if (error) return <p>Erreur : {error}</p>;
 
   return (
@@ -130,6 +149,7 @@ function Employees() {
         employeeCompanyMap={employeeCompanyMap}
         handleAssignChange={handleAssignChange}
         assignEmployee={assignEmployee}
+        unassignEmployee={unassignEmployee}
       />
     </div>
   );
